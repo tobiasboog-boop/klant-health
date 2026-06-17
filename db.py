@@ -24,17 +24,16 @@ def _schema() -> str:
 
 
 def _get_connection():
-    host = os.environ.get("STREAMLIT_DB_HOST")
-    user = os.environ.get("STREAMLIT_DB_USER")
+    # Niet-geheime defaults (interne WireGuard-host/db/rol) zodat alleen het
+    # WACHTWOORD nog als env-var hoeft. Alles blijft overschrijfbaar via env.
+    host = os.environ.get("STREAMLIT_DB_HOST") or "10.3.152.9"
+    user = os.environ.get("STREAMLIT_DB_USER") or "streamlit_app"
+    dbname = os.environ.get("STREAMLIT_DB_NAME") or "notifica_streamlit"
+    port = int(os.environ.get("STREAMLIT_DB_PORT") or "5432")
     password = os.environ.get("STREAMLIT_DB_PASSWORD")
-    dbname = os.environ.get("STREAMLIT_DB_NAME")
-    port = int(os.environ.get("STREAMLIT_DB_PORT", "5432"))
 
-    if not all([host, user, password, dbname]):
-        raise RuntimeError(
-            "Streamlit-DB credentials ontbreken. Zet STREAMLIT_DB_HOST / _NAME / "
-            "_USER / _PASSWORD in .env."
-        )
+    if not password:
+        raise RuntimeError("STREAMLIT_DB_PASSWORD ontbreekt — zet alleen dat veld in de env-vars.")
     return psycopg2.connect(host=host, port=port, user=user, password=password,
                             dbname=dbname, connect_timeout=10)
 
