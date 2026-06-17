@@ -25,7 +25,7 @@ from data import (
     fetch_pipedrive_deals, fetch_pipedrive_stages,
     fetch_emailoctopus_campaign_activity,
     load_web_visitors, load_powerbi_data, validate_powerbi_data,
-    build_leads_df, calculate_customer_health, get_customer_contacts,
+    build_leads_df, LEAD_COLUMNS, calculate_customer_health, get_customer_contacts,
     load_campaign_data, load_campaign_activity,
     save_pipedrive_note, update_pipedrive_deal_stage,
     fetch_pipedrive_person_notes, generate_nid,
@@ -237,6 +237,10 @@ try:
 except Exception as _e:
     st.error(f"Build leads fout: {_e}")
     leads_df = pd.DataFrame()
+# Garandeer het volledige lead-schema zodat kolom-toegang downstream nooit
+# KeyError geeft (bij lege/incomplete brondata of een build-fout). reindex
+# werkt ook op een lege 0-kolom DataFrame (i.t.t. kolom-assignment).
+leads_df = leads_df.reindex(columns=list(dict.fromkeys(list(leads_df.columns) + LEAD_COLUMNS)))
 try:
     health_df = calculate_customer_health(pbi_df)
     if not health_df.empty:
@@ -642,13 +646,13 @@ if pagina == "Mijn Week":
             return True
         return str(int(pid)) not in _recent_pids
 
-    leads_for_auto = leads_df[leads_df["Pipedrive ID"].apply(_not_recent)].copy()
+    leads_for_auto = leads_df[leads_df["Pipedrive ID"].apply(_not_recent).astype(bool)].copy()
 
     # Filter leads waarvoor al een klantreis-fase is ingesteld (al opgepakt)
     _fasen_dict = st.session_state.get("klantreis_fasen", {})
     def _geen_fase(email):
         return _fasen_dict.get(str(email).lower(), "— onbekend —") == "— onbekend —"
-    leads_for_auto = leads_for_auto[leads_for_auto["Email"].apply(_geen_fase)].copy()
+    leads_for_auto = leads_for_auto[leads_for_auto["Email"].apply(_geen_fase).astype(bool)].copy()
 
     tobias_auto, arthur_auto = _split_leads_for_roles(leads_for_auto, 5)
     tobias_klanten, arthur_klanten = _get_klant_opvolging(health_df, 5)

@@ -1198,6 +1198,18 @@ def classify_lead(total_score):
 
 
 
+# Canoniek schema van de leads-tabel — gebruikt voor lege returns én als
+# garantie downstream (voorkomt KeyError bij lege/incomplete brondata).
+LEAD_COLUMNS = [
+    "Naam", "Email", "Bedrijf", "Telefoon", "Opens", "Clicks",
+    "Open Score", "Click Score",
+    "Deal Fase", "Deal Waarde", "Deal Bonus", "Totaal", "Segment",
+    "Urgent", "In Pipedrive", "Pipedrive ID", "Deal ID",
+    "Deal Stage ID", "Deal Datum", "Web Score", "Web Paginas",
+    "Web HI Paginas", "Web Laatste Bezoek", "Web Pageviews",
+]
+
+
 def build_leads_df(ml_df, pd_df, web_mapping,
                    deals_dict=None, identified_df=None):
     """
@@ -1308,14 +1320,7 @@ def build_leads_df(ml_df, pd_df, web_mapping,
             ))
 
     if not leads:
-        return pd.DataFrame(columns=[
-            "Naam", "Email", "Bedrijf", "Telefoon", "Opens", "Clicks",
-            "Open Score", "Click Score",
-            "Deal Fase", "Deal Waarde", "Deal Bonus", "Totaal", "Segment",
-            "Urgent", "In Pipedrive", "Pipedrive ID", "Deal ID",
-            "Deal Stage ID", "Deal Datum", "Web Score", "Web Paginas",
-            "Web HI Paginas", "Web Laatste Bezoek", "Web Pageviews",
-        ])
+        return pd.DataFrame(columns=LEAD_COLUMNS)
 
     df = pd.DataFrame(leads)
     # Deals altijd bovenaan, daarna op totaal score
