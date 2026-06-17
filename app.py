@@ -44,38 +44,6 @@ st.set_page_config(
 )
 
 
-# ============================================================
-#  TOEGANG — optionele wachtwoord-gate (APP_PASSWORD in .env)
-# ============================================================
-def _check_password() -> bool:
-    """Wachtwoord-gate. Het platform schrijft het draft-wachtwoord naar
-    .streamlit/secrets.toml als [auth].password; lokaal kan APP_PASSWORD in
-    .env gebruikt worden. Geen wachtwoord ingesteld = geen gate."""
-    expected = None
-    try:
-        expected = st.secrets["auth"]["password"]
-    except Exception:
-        expected = None
-    if not expected:
-        expected = os.environ.get("APP_PASSWORD")
-    if not expected:
-        return True
-    if st.session_state.get("_auth_ok"):
-        return True
-    st.title("Notifica Sales & Klant Dashboard")
-    pw = st.text_input("Wachtwoord", type="password")
-    if pw:
-        if pw == expected:
-            st.session_state["_auth_ok"] = True
-            st.rerun()
-        else:
-            st.error("Onjuist wachtwoord.")
-    return False
-
-
-if not _check_password():
-    st.stop()
-
 # --- Custom CSS ---
 st.markdown("""
 <style>
