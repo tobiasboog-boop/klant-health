@@ -1,0 +1,8 @@
+streamlit
+pandas
+requests
+openpyxl
+pyarrow
+python-dotenv
+anthropic
+psycopg2-binary>=2.9

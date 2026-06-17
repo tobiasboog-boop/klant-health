@@ -1,0 +1,15 @@
+# Secrets — nooit committen
+.env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Lokale data / cache
+data/
+*.parquet
+
+# Bevat bedrijfsnamen + engagement — niet in (publieke) git; live bron = Cloudflare API
+web_visitors_mapping.csv
